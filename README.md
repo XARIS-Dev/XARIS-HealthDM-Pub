@@ -1,7 +1,7 @@
 # HealthDM
 
 HealthDM production releases for Linux servers. Each release has an `amd64` (Intel/AMD) and
-an `arm64` (ARM) package. The installer picks the right one for your server automatically.
+an `arm64` (ARM) package. Use the one that matches your server's CPU.
 
 ## System requirements
 
@@ -51,9 +51,31 @@ Then apply the change with `cd /opt/healthdm && docker compose up -d`. With 8 wo
 
 ## Install
 
+Run the command for your server's CPU. `uname -m` shows `x86_64` on Intel/AMD servers and
+`aarch64` on ARM servers. Each command downloads the release, verifies its SHA-256 checksum,
+then runs the installer.
+
+**Intel/AMD (`amd64`):**
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/XARIS-Dev/XARIS-HealthDM-Pub/main/install.sh | bash -s -- --bind 0.0.0.0
+curl -fLO https://github.com/XARIS-Dev/XARIS-HealthDM-Pub/releases/download/v2.0.0/healthdm-v2.0.0-linux-amd64.tar.gz \
+  && curl -fLO https://github.com/XARIS-Dev/XARIS-HealthDM-Pub/releases/download/v2.0.0/healthdm-v2.0.0-linux-checksums.sha256 \
+  && sha256sum -c --ignore-missing healthdm-v2.0.0-linux-checksums.sha256 \
+  && tar -xzf healthdm-v2.0.0-linux-amd64.tar.gz \
+  && ./healthdm-v2.0.0-linux-amd64/install.sh --bind 0.0.0.0
 ```
+
+**ARM (`arm64`):**
+
+```bash
+curl -fLO https://github.com/XARIS-Dev/XARIS-HealthDM-Pub/releases/download/v2.0.0/healthdm-v2.0.0-linux-arm64.tar.gz \
+  && curl -fLO https://github.com/XARIS-Dev/XARIS-HealthDM-Pub/releases/download/v2.0.0/healthdm-v2.0.0-linux-checksums.sha256 \
+  && sha256sum -c --ignore-missing healthdm-v2.0.0-linux-checksums.sha256 \
+  && tar -xzf healthdm-v2.0.0-linux-arm64.tar.gz \
+  && ./healthdm-v2.0.0-linux-arm64/install.sh --bind 0.0.0.0
+```
+
+The download is about 800 MB and is saved in the current directory.
 
 When it finishes, the installer prints the address to open (`http://SERVER_ADDRESS:8800`)
 and a one-time setup token. Open the address, enter the token and create the administrator
@@ -64,8 +86,9 @@ reachable from the server itself only, for example behind a reverse proxy.
 
 ## Upgrade
 
-Run the same command again. The installer finds the existing installation, takes a verified
-backup, then upgrades it in place. Your data and settings are kept.
+Run the install command for your server's CPU from the new release. The installer finds the
+existing installation, takes a verified backup, then upgrades it in place. Your data and
+settings are kept.
 
 ## Stop and start
 
@@ -88,11 +111,10 @@ If Docker needs administrator rights on your server, put `sudo` before each comm
 
 ## Options
 
-Add options after `bash -s --`:
+Add options after `install.sh` at the end of the install command:
 
 | Option | Description |
 | --- | --- |
-| `--version v2.0.0` | Install a specific release instead of the latest |
 | `--bind 0.0.0.0` | Allow access from other machines (default: this server only) |
 | `--port 8800` | HTTP port (default: 8800) |
 | `--dir /opt/healthdm` | Install directory |
@@ -100,8 +122,9 @@ Add options after `bash -s --`:
 
 ## Offline install
 
-Download the `.tar.gz` for your server and the `.sha256` file from
-[Releases](https://github.com/XARIS-Dev/XARIS-HealthDM-Pub/releases), then:
+For a server without internet access, download the `.tar.gz` for your server and the
+`.sha256` file from [Releases](https://github.com/XARIS-Dev/XARIS-HealthDM-Pub/releases) on
+another machine, copy both to the server, then:
 
 ```bash
 sha256sum -c --ignore-missing healthdm-v2.0.0-linux-checksums.sha256
